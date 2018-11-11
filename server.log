@@ -1,0 +1,82 @@
+2018-11-11 12-31-33 [-] Received data from client:  
+2018-11-11 12-37-29 [-] Start ftp server Enter q or Q to stop ftpServer...
+2018-11-11 12-37-34 [-] Start ftp server Enter q or Q to stop ftpServer...
+2018-11-11 12-37-34 [-] Server started Listen on: 192.168.0.100, 8888
+2018-11-11 12-37-41 [-] Accept Created a new connection 192.168.0.100, 61578
+2018-11-11 12-37-41 [-] [192.168.0.100, 61578] Received data from client:  AUTH TLS
+2018-11-11 12-37-41 [-] [192.168.0.100, 61578] Received data from client:  AUTH SSL
+2018-11-11 12-37-43 [-] [192.168.0.100, 61578] Received data from client:  USER admin
+2018-11-11 12-37-43 [-] USER admin
+2018-11-11 12-37-43 [-] [192.168.0.100, 61578] Received data from client:  PASS admin
+2018-11-11 12-37-43 [-] PASS admin
+2018-11-11 12-37-43 [-] [192.168.0.100, 61578] Received data from client:  SYST
+2018-11-11 12-37-43 [-] SYST None
+2018-11-11 12-37-43 [-] [192.168.0.100, 61578] Received data from client:  FEAT
+2018-11-11 12-37-43 [-] [192.168.0.100, 61578] Received data from client:  PWD
+2018-11-11 12-37-43 [-] PWD None
+2018-11-11 12-37-43 [-] [192.168.0.100, 61578] Received data from client:  TYPE I
+2018-11-11 12-37-43 [-] TYPE I
+2018-11-11 12-37-43 [-] [192.168.0.100, 61578] Received data from client:  PASV
+2018-11-11 12-37-43 [-] PASV None
+2018-11-11 12-37-43 [-] [192.168.0.100, 61578] Received data from client:  LIST
+2018-11-11 12-37-43 [-] LIST /Users/mac/Documents/workspace/CS472 A2
+2018-11-11 12-37-43 [-] startDataSock Opening a data channel
+2018-11-11 12-37-43 [-] stopDataSock Closing a data channel
+2018-11-11 12-37-57 [-] [192.168.0.100, 61581] Received data from client:  CWD /Users/mac/Documents/workspace/CS472 A2/test
+2018-11-11 12-37-57 [-] CWD /Users/mac/Documents/workspace/CS472 A2/test
+2018-11-11 12-37-57 [-] [192.168.0.100, 61581] Received data from client:  PWD
+2018-11-11 12-37-57 [-] PWD None
+2018-11-11 12-37-57 [-] [192.168.0.100, 61581] Received data from client:  PASV
+2018-11-11 12-37-57 [-] PASV None
+2018-11-11 12-37-57 [-] [192.168.0.100, 61581] Received data from client:  LIST
+2018-11-11 12-37-57 [-] LIST /Users/mac/Documents/workspace/CS472 A2/test
+2018-11-11 12-37-57 [-] startDataSock Opening a data channel
+2018-11-11 12-37-57 [-] stopDataSock Closing a data channel
+2018-11-11 12-38-11 [-] [192.168.0.100, 61583] Received data from client:  PASV
+2018-11-11 12-38-11 [-] PASV None
+2018-11-11 12-38-11 [-] [192.168.0.100, 61583] Received data from client:  STOR world.txt
+2018-11-11 12-38-11 [-] STOR /Users/mac/Documents/workspace/CS472 A2/test/world.txt
+2018-11-11 12-38-11 [-] startDataSock Opening a data channel
+2018-11-11 12-38-11 [-] stopDataSock Closing a data channel
+2018-11-11 12-38-43 [-] Accept Created a new connection 192.168.0.100, 61588
+2018-11-11 12-38-47 [-] [192.168.0.100, 61588] Received data from client:  USER admin
+2018-11-11 12-38-47 [-] USER admin
+2018-11-11 12-38-49 [-] [192.168.0.100, 61588] Received data from client:  PASS admin
+2018-11-11 12-38-49 [-] PASS admin
+2018-11-11 12-38-55 [-] [192.168.0.100, 61588] Received data from client:  HELP
+2018-11-11 12-39-18 [-] [192.168.0.100, 61586] Received data from client:  MKD test2
+2018-11-11 12-39-18 [-] MKD /Users/mac/Documents/workspace/CS472 A2/test/test2
+2018-11-11 12-39-41 [-] Accept Created a new connection 192.168.0.100, 61591
+2018-11-11 12-39-41 [-] [192.168.0.100, 61591] Received data from client:  AUTH TLS
+2018-11-11 12-39-41 [-] [192.168.0.100, 61591] Received data from client:  AUTH SSL
+2018-11-11 12-39-41 [-] [192.168.0.100, 61591] Received data from client:  USER admin
+2018-11-11 12-39-41 [-] USER admin
+2018-11-11 12-39-41 [-] [192.168.0.100, 61591] Received data from client:  PASS admin
+2018-11-11 12-39-41 [-] PASS admin
+2018-11-11 12-39-41 [-] [192.168.0.100, 61591] Received data from client:  CWD /Users/mac/Documents/workspace/CS472 A2/test
+2018-11-11 12-39-41 [-] CWD /Users/mac/Documents/workspace/CS472 A2/test
+2018-11-11 12-39-41 [-] [192.168.0.100, 61591] Received data from client:  TYPE I
+2018-11-11 12-39-41 [-] TYPE I
+2018-11-11 12-39-41 [-] [192.168.0.100, 61591] Received data from client:  PASV
+2018-11-11 12-39-41 [-] PASV None
+2018-11-11 12-39-41 [-] [192.168.0.100, 61591] Received data from client:  LIST
+2018-11-11 12-39-41 [-] LIST /Users/mac/Documents/workspace/CS472 A2/test
+2018-11-11 12-39-41 [-] startDataSock Opening a data channel
+2018-11-11 12-39-41 [-] stopDataSock Closing a data channel
+2018-11-11 12-39-41 [-] [192.168.0.100, 61593] Received data from client:  TYPE A
+2018-11-11 12-39-41 [-] TYPE A
+2018-11-11 12-39-41 [-] [192.168.0.100, 61593] Received data from client:  PASV
+2018-11-11 12-39-41 [-] PASV None
+2018-11-11 12-39-41 [-] [192.168.0.100, 61593] Received data from client:  RETR world.txt
+2018-11-11 12-39-41 [-] RETR /Users/mac/Documents/workspace/CS472 A2/test/world.txt
+2018-11-11 12-39-41 [-] startDataSock Opening a data channel
+2018-11-11 12-39-41 [-] stopDataSock Closing a data channel
+2018-11-11 12-39-58 [-] [192.168.0.100, 61595] Received data from client:  PASV
+2018-11-11 12-39-58 [-] PASV None
+2018-11-11 12-39-58 [-] [192.168.0.100, 61595] Received data from client:  STOR worldq.txt
+2018-11-11 12-39-58 [-] STOR /Users/mac/Documents/workspace/CS472 A2/test/worldq.txt
+2018-11-11 12-39-58 [-] startDataSock Opening a data channel
+2018-11-11 12-39-58 [-] stopDataSock Closing a data channel
+2018-11-11 12-40-04 [-] [192.168.0.100, 61586] Received data from client:  DELE worldq.txt
+2018-11-11 12-40-04 [-] DELE /Users/mac/Documents/workspace/CS472 A2/test/worldq.txt
+2018-11-11 12-40-58 [-] [192.168.0.100, 61598] Received data from client:  
