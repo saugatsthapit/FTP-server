@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # --*-- coding: utf-8 --*--
 
 import socket
@@ -9,15 +9,28 @@ import sys
 import time
 import grp
 import pwd
+import ssl
+import codecs
 
 try:
-    HOST = socket.gethostbyname(socket.gethostname())
+    import ConfigParser
+except ImportError:
+    import configparser as ConfigParser
+
+try:
+    HOST = '127.0.0.1'  # socket.gethostbyname(socket.gethostname())
 except socket.error:
     HOST = '127.0.0.1'
-PORT = 8888  # command port
+    
+PORT = 8443  # command port
 CWD = os.path.abspath('.')  # os.getenv('HOME')
 allow_delete = True  # used to indicate if it's allowed to delete files or not
 logfile = os.getcwd() + r'/socket-server.log'  # name of the log file
+config_file_path = "ftpserverd.conf"
+
+''' Reads the settings from the digital_ocean.ini file '''
+config = ConfigParser.SafeConfigParser()
+config.read(os.path.dirname(os.path.realpath(__file__)) + '/' + config_file_path)
 
 
 def log(func, cmd, client_address=None):
@@ -31,8 +44,17 @@ def log(func, cmd, client_address=None):
     # Write log to file
     f = open(logfile, 'a+')  # 'a' will append to an existing file if it exists
     f.write(logmsg + " {}\n".format(cmd))  # write the text to the logfile and move to next line
-        
 
+        
+# Load config properties
+try: 
+    # if config.has_option('server_options', 'port_mode'):
+    #    self.api_token = config.get('server_options', 'port_mode')
+    port_mode = config.get('server_options', 'port_mode').encode('utf-8')
+    pasv_mode = config.get('server_options', 'pasv_mode').encode('utf-8')
+except Exception as err:
+    log('Config ERR', err)
+    
 # List of available commands
 COMMANDS = ["CDUP", "CWD", "EPRT", "EPSV", "HELP", "LIST", "PASS",
             "PASV", "PORT", "PWD", "QUIT", "RETR", "STOR", "SYST", "TYPE", "USER",
@@ -44,6 +66,7 @@ class FtpServerProtocol(threading.Thread):
     def __init__(self, conn, address):
         threading.Thread.__init__(self)
         self.authenticated = False
+        self.banned_username = False
         self.pasv_mode = False
         self.rest = False
         self.cwd = CWD
@@ -69,7 +92,6 @@ class FtpServerProtocol(threading.Thread):
                     log('Received data from client: ', cmd, self.address)
                 except AttributeError:
                     cmd = data
-                    # data = None
                 
                  # if received data is empty or not exists break this loop
                 if not cmd or cmd is None: 
@@ -124,11 +146,9 @@ class FtpServerProtocol(threading.Thread):
 
     def sendCommand(self, cmd):
         self.commSock.send(cmd.encode('utf-8'))
-        # self.commSock.sendall(cmd.encode('utf-8'))
 
     def sendData(self, data):
         self.dataSock.send(data.encode('utf-8'))
-        # self.dataSock.sendall(data.encode('utf-8'))
 
     def sendWelcome(self):
         """
@@ -175,10 +195,58 @@ class FtpServerProtocol(threading.Thread):
                 if self.username == info[0] and self.passwd == info[1]:
                     self.authenticated = True
                     self.sendCommand('230 User logged in, proceed.\r\n')
+                    self.saveAuthentication(True)
                     break
         if not self.authenticated:
             self.sendCommand('Provided credentials are not found.\r\n')
       
+    # Function used to save all authentication data together with number of tries to authenticate
+    def saveAuthentication(self, resset):
+        if self.username is not None and self.passwd is not None:
+            user_founded = False
+            
+            # Read authentication saved data
+            file = open('ftpserver.secure', 'r+')  # open the file:
+            lines = file.readlines()  # get all your lines from the file
+            file.close()  # close the file
+            
+            file = open('ftpserver.secure', 'w')  # reopen it in write mode
+            for line in lines:
+                if line.startswith(self.username):  # username found
+                    user_founded = True
+                    cnt_auth = int(line.split(":")[2])
+                    
+                    if cnt_auth > 3:
+                        self.banned_username = True
+                        
+                    if resset:
+                        file.write(self.username + ":" + self.passwd + ":%d" % (1))
+                    else:
+                        file.write(self.username + ":" + self.passwd + ":%d" % (cnt_auth + 1))
+                    
+                else:
+                    file.write(line)  # write your lines back
+            file.close()  # close the file again
+                        
+            # means credentials will be inserted into file
+            if not user_founded:
+                # open a file for writing and create it if does not exist
+                with open('ftpserver.secure', 'a+') as f:
+                    f.write(self.username + ":" + self.passwd + ":%d" % (1))
+            
+    def checkBlockedUsername(self):
+        if hasattr(self, 'username') and self.username is not None:
+            file = open('ftpserver.secure', 'r+')  # open the file:
+            lines = file.readlines()  # get all your lines from the file
+            for line in lines:
+                if line.startswith(self.username):  # username found
+                    cnt_auth = int(line.split(":")[2])
+                    
+                    if cnt_auth > 3:
+                        self.banned_username = True
+                        return True
+        return False
+        
     def _support_hybrid_ipv6(self):
         """Return True if it is possible to use hybrid IPv6/IPv4 sockets on this platform.
         """
@@ -463,6 +531,7 @@ class FtpServerProtocol(threading.Thread):
     # Set password for current user used to authenticate
     def PASS(self, passwd):
         log("PASS", passwd)
+        
         if passwd is None or not passwd:
             self.sendCommand('501 Syntax error in parameters or arguments.\r\n')
 
@@ -471,36 +540,47 @@ class FtpServerProtocol(threading.Thread):
                              'Please set username first calling the function "USER".\r\n')
 
         else:
-            self.passwd = passwd
-            self.validateCredentials()
+            self.checkBlockedUsername()
+            if self.banned_username:
+                log('PASS', "The username: " + self.username + " is blocked. You should unlock username first.")
+            else:
+                self.passwd = passwd
+                self.saveAuthentication(False)
+                self.validateCredentials()
             
     # Asks the server to accept a data connection on a new TCP port selected by the server. 
     # PASV parameters are prohibited
     def PASV(self, cmd):
-        log("PASV", cmd)
-        self.pasv_mode = True
-        self.serverSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.serverSock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.serverSock.bind((HOST, 0))
-        self.serverSock.listen(5)
-        addr, port = self.serverSock.getsockname()
-        self.sendCommand('227 Entering Passive Mode (%s,%u,%u).\r\n' % 
-                (','.join(addr.split('.')), port >> 8 & 0xFF, port & 0xFF))
+        if pasv_mode is not None and pasv_mode.lower().decode() == "yes":
+            log("PASV", cmd)
+            self.pasv_mode = True
+            self.serverSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.serverSock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.serverSock.bind((HOST, 0))
+            self.serverSock.listen(5)
+            addr, port = self.serverSock.getsockname()
+            self.sendCommand('227 Entering Passive Mode (%s,%u,%u).\r\n' % 
+                    (','.join(addr.split('.')), port >> 8 & 0xFF, port & 0xFF))
+        else:
+           log("PASV", "PASV function is disabled by config file") 
     
     # Use a different mechanism of creating a data connection. The PORT request has a parameter in the form:
     # h1,h2,h3,h4,p1,p2 : meaning that the client is listening for connections on TCP port p1*256+p2 
     # at IP address h1.h2.h3.h4
     def PORT(self, cmd):
-        """Start an active data channel by using IPv4."""
-        log("PORT: ", cmd)
-        if self.pasv_mode:
-            self.servsock.close()
-            self.pasv_mode = False
-        l = cmd[5:].split(',')
-        self.dataSockAddr = '.'.join(l[:4])
-        self.dataSockPort = (int(l[4]) << 8) + int(l[5])
-        self.sendCommand('200 Get port.\r\n')
-    
+        if port_mode is not None and port_mode.lower().decode() == "yes" :
+            """Start an active data channel by using IPv4."""
+            log("PORT: ", cmd)
+            if self.pasv_mode:
+                self.servsock.close()
+                self.pasv_mode = False
+            l = cmd[5:].split(',')
+            self.dataSockAddr = '.'.join(l[:4])
+            self.dataSockPort = (int(l[4]) << 8) + int(l[5])
+            self.sendCommand('200 Get port.\r\n')
+        else:
+           log("PORT", "PORT function is disabled by config file") 
+           
     # Return current working directory
     def PWD(self, cmd):
         log('PWD', cmd)
@@ -588,8 +668,11 @@ class FtpServerProtocol(threading.Thread):
             self.sendCommand('501 Syntax error in parameters or arguments.\r\n')
 
         else:
-            self.sendCommand('331 User name okay, need password.\r\n')
-            self.username = user
+            if self.banned_username:
+                log('USER', "This username is blocked: " + user)
+            else:
+                self.sendCommand('331 User name okay, need password.\r\n')
+                self.username = user
 
     # # Optional functions ##
 
@@ -709,22 +792,31 @@ class FtpServerProtocol(threading.Thread):
 
 
 def serverListener():
-    global listen_sock
+    
+    ''' AF_INET refers to the address family ipv4 '''
+    ''' SOCK_STREAM means connection oriented TCP protocol '''
     listen_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     listen_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     listen_sock.bind((HOST, PORT))
-    listen_sock.listen(5)
-
+    listen_sock.listen(5)  # put the socket into listening mode
+    
     log('Server started', 'Listen on: %s, %s' % listen_sock.getsockname())
+    
+    ''' a forever loop until we interrupt it or an error occurs '''
     while True:
-        connection, address = listen_sock.accept()
+        connection, address = listen_sock.accept()  # Establish connection with client.
         f = FtpServerProtocol(connection, address)
         f.start()
         log('Accept', 'Created a new connection %s, %s' % address)
-
+            
 
 if __name__ == "__main__":
     
+    # if config file is not configured properly the stop the server
+    if port_mode.lower().decode() == "no" and pasv_mode.lower().decode() == "no":
+        log('Server stop', "PortMode and PasvMode can't be both disabled. Please check config file")
+        sys.exit()
+        
     # the program should have 2 arguments: `1- log file; 2- port number
     if len(sys.argv) == 3:  # Should be check for 3 because the first argument is the running filename
 
@@ -742,7 +834,7 @@ if __name__ == "__main__":
         else:
             PORT = arg_port
             
-        log('Start ftp server', 'Enter q or Q to stop ftpServer...')
+        log('Start ftp server:', 'Enter q or Q to stop ftpServer...')
         listener = threading.Thread(target=serverListener)
         listener.start()
     
