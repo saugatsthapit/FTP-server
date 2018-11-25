@@ -1,0 +1,21 @@
+Part A:
+('2018-11-19 14-13-39 [-] Server stop', "PortMode and PasvMode can't be both disabled. Please check config file")
+
+
+Part C:
+
+('2018-11-19 14-09-54 [-] Accept', 'Created a new connection 127.0.0.1, 51328')
+('2018-11-19 14-10-04 [-] [127.0.0.1, 51328] Received data from client: ', u'USER admin')
+('2018-11-19 14-10-04 [-] USER', u'admin')
+('2018-11-19 14-10-13 [-] [127.0.0.1, 51328] Received data from client: ', u'pass abcd')
+('2018-11-19 14-10-13 [-] PASS', u'abcd')
+('2018-11-19 14-10-21 [-] [127.0.0.1, 51328] Received data from client: ', u'pass abcde')
+('2018-11-19 14-10-21 [-] PASS', u'abcde')
+('2018-11-19 14-10-27 [-] [127.0.0.1, 51328] Received data from client: ', u'pass abcdef')
+('2018-11-19 14-10-27 [-] PASS', u'abcdef')
+('2018-11-19 14-10-35 [-] [127.0.0.1, 51328] Received data from client: ', u'pass abcdefg')
+('2018-11-19 14-10-35 [-] PASS', u'abcdefg')
+('2018-11-19 14-10-35 [-] PASS', u'The username: admin is blocked. You should unlock username first.')
+('2018-11-19 14-10-46 [-] [127.0.0.1, 51328] Received data from client: ', u'pass abcde')
+('2018-11-19 14-10-46 [-] PASS', u'abcde')
+('2018-11-19 14-10-46 [-] PASS', u'The username: admin is blocked. You should unlock username first.')
